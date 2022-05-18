@@ -38,7 +38,7 @@ const run = async () => {
 
     //getting user added todos
     app.get("/todos", async (req, res) => {
-      const email= req.query;
+      const email= req.query.email;
       const cursor = todoCollection.find({email:email});
       const toDos = await cursor.toArray();
       res.send(toDos);
@@ -57,7 +57,6 @@ const run = async () => {
         const query = {_id:Object(todoId)};
         const result = await todoCollection.deleteOne(query);
         res.send(result);
-
     })
 
 
