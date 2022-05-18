@@ -59,6 +59,20 @@ const run = async () => {
         res.send(result);
     })
 
+    //update todo
+    app.patch('/todos/:todoId', async(req, res)=>{
+        const id = req.params.todoId;
+        const updatedField = req.body;
+        const filter = {_id:ObjectId(id)};
+        const updatedDoc = {
+            $set:{
+                completed:updatedField.completed
+            }
+        }
+        const result = await todoCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+    })
+
 
   } 
   finally {
