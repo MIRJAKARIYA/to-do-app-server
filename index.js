@@ -24,6 +24,18 @@ const run = async () => {
       .db("TO_DO_LIST")
       .collection("user_added_to_do");
 
+
+    //login with JWT
+    app.post("/getToken", async (req, res) => {
+        const user = req.body.email;
+        const payload = {email:user}
+        console.log(user)
+        const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
+          expiresIn: "1d",
+        });
+        res.send({ accessToken });
+      });
+
     //getting user added todos
     app.get("/todos", async (req, res) => {
       const email= req.query;
@@ -54,11 +66,12 @@ const run = async () => {
 
   }
 };
+run().catch(console.dir);
 
 app.get("/", (req, res) => {
   res.send("Hello from to do app");
 });
 
 app.listen(port, () => {
-  console.log(`Doctors app listening on port ${port}`);
+  console.log(`app listening on port ${port}`);
 });
