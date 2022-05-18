@@ -17,6 +17,28 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+
+//verify JWT token
+const verifyToken = (req, res, next) => {
+    const authorization = req.headers.authorization;
+    if (!authorization) {
+      return res
+        .status(401)
+        .send({ authorization: false, message: "Unauthorized access" });
+    }
+    const token = authorization.split(" ")[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+      if (err) {
+        return res
+          .status(403)
+          .send({ authorization: false, message: "Forbidded access" });
+      }
+      req.decoded = decoded;
+      next();
+    });
+  };
+
+
 const run = async () => {
   try {
     await client.connect();
@@ -37,22 +59,22 @@ const run = async () => {
       });
 
     //getting user added todos
-    app.get("/todos", async (req, res) => {
+    app.get("/todos",verifyToken, async (req, res) => {
       const email= req.query.email;
       const cursor = todoCollection.find({email:email});
       const toDos = await cursor.toArray();
-      res.send(toDos);
+      res.send({authorization:true,toDos});
     });
 
     //add todo
-    app.post('/todos', async(req, res)=>{
+    app.post('/todos',verifyToken, async(req, res)=>{
         const toDo = req.body;
         const result = await todoCollection.insertOne(toDo);
         res.send(result)   
     });
 
     //delete todo
-    app.delete('/todos/:taskId', async(req,res)=>{
+    app.delete('/todos/:taskId',verifyToken, async(req,res)=>{
         const id = req.params.taskId;
         const query = {_id:ObjectId(id)}
         const result = await todoCollection.deleteOne(query);
@@ -60,7 +82,7 @@ const run = async () => {
     })
 
     //update todo
-    app.patch('/todos/:todoId', async(req, res)=>{
+    app.patch('/todos/:todoId',verifyToken, async(req, res)=>{
         const id = req.params.todoId;
         const updatedField = req.body;
         const filter = {_id:ObjectId(id)};
