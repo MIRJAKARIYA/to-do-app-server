@@ -51,7 +51,6 @@ const run = async () => {
     app.post("/getToken", async (req, res) => {
         const user = req.body.email;
         const payload = {email:user}
-        console.log(user)
         const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
           expiresIn: "1d",
         });
